@@ -1,17 +1,19 @@
 pipeline {
     agent any
+
     tools {
-        maven 'Maven 3.9.9'
+        maven 'Maven'
+        jdk 'JDK-21'
     }
+
     environment {
-        IMAGE_NAME = "nityaom/mywebapp"
-        DOCKER_USERNAME = "nityaom"
-        DOCKER_PASSWORD = "*bZM3Jy9t4?jyhF"
+        SONARQUBE_SCANNER_HOME = tool 'SonarQubeScanner'
     }
+
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/nityaomnathial/MyWebApp.git'
+                git url: 'https://github.com/nityaomnathial/MyWebApp.git', branch: 'master'
             }
         }
 
@@ -31,43 +33,58 @@ pipeline {
 
         stage('Archive Artifact') {
             steps {
-                archiveArtifacts artifacts: '**/target/*.war', fingerprint: true
+                archiveArtifacts artifacts: 'target/*.war', fingerprint: true
             }
         }
 
-        stage('Docker Login') {
-            steps {
-                bat '''
-                echo %DOCKER_PASSWORD% | docker login -u %DOCKER_USERNAME% --password-stdin
-                '''
-            }
+     stage('Docker Login') {
+    steps {
+        withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+            bat '''
+                docker logout
+                echo Logging in with fresh PAT...
+                echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+            '''
         }
+    }
+}
+
+
 
         stage('Docker Build') {
             steps {
-                bat "docker build -t %IMAGE_NAME% ."
+                bat 'docker build -t nityaom/mywebapp:latest .'
             }
         }
 
         stage('Docker Push') {
             steps {
-                bat "docker push %IMAGE_NAME%"
+                bat 'docker push nityaom/mywebapp:latest'
             }
         }
 
         stage('Git Push') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'github-pat', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_TOKEN')]) {
+                withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
                     bat '''
-                    git config --global user.name "%GIT_USERNAME%"
-                    git config --global user.email "nnathial@my.centennialcollege.ca"
-                    git remote set-url origin https://%GIT_USERNAME%:%GIT_TOKEN%@github.com/nityaomnathial/MyWebApp.git
-                    git add .
-                    git commit -m "Automated commit from Jenkins"
-                    git push origin master
+                        git config --global user.email "nnathial@my.centennialcollege.ca"
+                        git config --global user.name "nityaomnathial"
+                        git remote set-url origin https://%GIT_USER%:%GIT_TOKEN%@github.com/nityaomnathial/MyWebApp.git
+                        git add .
+                        git commit -m "Automated update from Jenkins"
+                        git push origin master
                     '''
                 }
             }
+        }
+    }
+
+    post {
+        failure {
+            echo '🚨 Pipeline failed — we ride again!'
+        }
+        success {
+            echo '✅ Pipeline complete! High fives all around!'
         }
     }
 }
