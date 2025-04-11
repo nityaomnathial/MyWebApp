@@ -4,8 +4,9 @@ pipeline {
         maven 'Maven 3.9.9'
     }
     environment {
-        DOCKER_HUB_CREDENTIALS = credentials('dockerhub')
         IMAGE_NAME = "nityaom/mywebapp"
+        DOCKER_USERNAME = "nityaom"
+        DOCKER_PASSWORD = "*bZM3Jy9t4?jyhF"
     }
     stages {
         stage('Checkout') {
@@ -36,7 +37,9 @@ pipeline {
 
         stage('Docker Login') {
             steps {
-                bat "echo %DOCKER_HUB_CREDENTIALS_PSW% | docker login -u %DOCKER_HUB_CREDENTIALS_USR% --password-stdin"
+                bat '''
+                echo %DOCKER_PASSWORD% | docker login -u %DOCKER_USERNAME% --password-stdin
+                '''
             }
         }
 
@@ -51,12 +54,20 @@ pipeline {
                 bat "docker push %IMAGE_NAME%"
             }
         }
-    }
 
-    post {
-        always {
-            echo 'Cleaning up workspace...'
-            cleanWs()
+        stage('Git Push') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'github-pat', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_TOKEN')]) {
+                    bat '''
+                    git config --global user.name "%GIT_USERNAME%"
+                    git config --global user.email "nnathial@my.centennialcollege.ca"
+                    git remote set-url origin https://%GIT_USERNAME%:%GIT_TOKEN%@github.com/nityaomnathial/MyWebApp.git
+                    git add .
+                    git commit -m "Automated commit from Jenkins"
+                    git push origin master
+                    '''
+                }
+            }
         }
     }
 }
