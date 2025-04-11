@@ -1,7 +1,7 @@
 pipeline {
     agent any
     tools {
-        maven 'Maven 3.9.9' // This must match your Jenkins Maven config
+        maven 'Maven 3.9.9'
     }
     environment {
         DOCKER_HUB_CREDENTIALS = credentials('dockerhub')
@@ -36,9 +36,7 @@ pipeline {
 
         stage('Docker Login') {
             steps {
-                bat '''
-                echo %DOCKER_HUB_CREDENTIALS_PSW% | docker login -u %DOCKER_HUB_CREDENTIALS_USR% --password-stdin
-                '''
+                bat "echo %DOCKER_HUB_CREDENTIALS_PSW% | docker login -u %DOCKER_HUB_CREDENTIALS_USR% --password-stdin"
             }
         }
 
@@ -52,6 +50,13 @@ pipeline {
             steps {
                 bat "docker push %IMAGE_NAME%"
             }
+        }
+    }
+
+    post {
+        always {
+            echo 'Cleaning up workspace...'
+            cleanWs()
         }
     }
 }
