@@ -1,13 +1,13 @@
 pipeline {
     agent any
 
-tools {
-    maven 'Maven 3.9.9'
-    jdk 'Java 17'
-}
+    tools {
+        maven 'Maven 3.9.9'      // Correct Maven version from Jenkins Global Tools
+        jdk 'Java 17'            // Correct JDK version from Jenkins Global Tools
+    }
 
     environment {
-        SONARQUBE_SCANNER_HOME = tool 'SonarQubeScanner'
+        SONARQUBE_SCANNER_HOME = tool 'SonarScanner' // Match this with what's configured
     }
 
     stages {
@@ -37,19 +37,16 @@ tools {
             }
         }
 
-     stage('Docker Login') {
-    steps {
-        withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-            bat '''
-                docker logout
-                echo Logging in with fresh PAT...
-                echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
-            '''
+        stage('Docker Login') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PAT')]) {
+                    bat '''
+                        docker logout
+                        echo %DOCKER_PAT% | docker login -u %DOCKER_USER% --password-stdin
+                    '''
+                }
+            }
         }
-    }
-}
-
-
 
         stage('Docker Build') {
             steps {
@@ -80,11 +77,11 @@ tools {
     }
 
     post {
-        failure {
-            echo '🚨 Pipeline failed — we ride again!'
-        }
         success {
             echo '✅ Pipeline complete! High fives all around!'
+        }
+        failure {
+            echo '🚨 Pipeline failed — we ride again!'
         }
     }
 }
