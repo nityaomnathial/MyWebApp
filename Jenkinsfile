@@ -7,7 +7,8 @@ pipeline {
     }
 
     environment {
-        // SONARQUBE_SCANNER_HOME = tool 'SonarScanner'
+        SONARQUBE_SCANNER_HOME = tool 'SonarScanner'
+        PATH = "${SONARQUBE_SCANNER_HOME}/bin:${env.PATH}"
     }
 
     stages {
@@ -23,14 +24,13 @@ pipeline {
             }
         }
 
-        // 💤 TEMP SKIPPED: SonarQube not working
-        // stage('SonarQube Analysis') {
-        //     steps {
-        //         withSonarQubeEnv('MyLocalSonar') {
-        //             bat 'mvn sonar:sonar'
-        //         }
-        //     }
-        // }
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('MyLocalSonar') {
+                    bat 'mvn sonar:sonar'
+                }
+            }
+        }
 
         stage('Archive Artifact') {
             steps {
@@ -82,7 +82,7 @@ pipeline {
             echo '✅ Pipeline complete! High fives all around!'
         }
         failure {
-            echo '🚨 Pipeline failed — we ride again!'
+            echo '🚨 Pipeline failed — time to suit up again!'
         }
     }
 }
