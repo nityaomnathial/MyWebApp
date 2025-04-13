@@ -1,10 +1,10 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven'
-        jdk 'JDK-21'
-    }
+tools {
+    maven 'Maven 3.9.9'
+    jdk 'Java 17'
+}
 
     environment {
         SONARQUBE_SCANNER_HOME = tool 'SonarQubeScanner'
