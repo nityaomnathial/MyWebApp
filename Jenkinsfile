@@ -24,11 +24,16 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
+        stage('SonarQube Analysis (Mocked)') {
             steps {
-                withSonarQubeEnv('MyLocalSonar') {
-                    bat 'mvn sonar:sonar'
-                }
+                echo "⚠️ SonarQube temporarily offline — mocking analysis step."
+                echo "Pretending to run: mvn sonar:sonar"
+            }
+        }
+
+        stage('Unit Tests') {
+            steps {
+                bat 'mvn test'
             }
         }
 
@@ -79,10 +84,10 @@ pipeline {
 
     post {
         success {
-            echo '✅ Pipeline complete! High fives all around!'
+            echo "✅ Pipeline complete — good stuff!"
         }
         failure {
-            echo '🚨 Pipeline failed — time to suit up again!'
+            echo "🚨 Pipeline failed — but you’re still a legend."
         }
     }
 }
