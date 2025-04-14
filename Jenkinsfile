@@ -48,7 +48,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PAT')]) {
                     bat '''
                         docker logout
-                        echo %DOCKER_PAT% | docker login -u %DOCKER_USER% --password-stdin
+                        docker login -u %DOCKER_USER% -p %DOCKER_PAT%
                     '''
                 }
             }
@@ -84,10 +84,7 @@ pipeline {
 
     post {
         failure {
-            echo "🚨 Pipeline failed — but you’re still a legend."
-        }
-        success {
-            echo "✅ Pipeline passed! Celebrate like Seedhe Maut just dropped a verse."
+            echo '🚨 Pipeline failed — but you’re still a legend.'
         }
     }
 }
