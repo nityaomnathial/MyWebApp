@@ -26,8 +26,8 @@ pipeline {
 
         stage('SonarQube Analysis (Mocked)') {
             steps {
-                echo "⚠️ SonarQube temporarily offline — mocking analysis step."
-                echo "Pretending to run: mvn sonar:sonar"
+                echo '⚠️ SonarQube temporarily offline — mocking analysis step.'
+                echo 'Pretending to run: mvn sonar:sonar'
             }
         }
 
@@ -56,13 +56,13 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                bat 'docker build -t nityaom/mywebapp:latest .'
+                bat 'docker build -t nnathial/mywebapp:latest .'
             }
         }
 
         stage('Docker Push') {
             steps {
-                bat 'docker push nityaom/mywebapp:latest'
+                bat 'docker push nnathial/mywebapp:latest'
             }
         }
 
@@ -83,11 +83,11 @@ pipeline {
     }
 
     post {
-        success {
-            echo "✅ Pipeline complete — good stuff!"
-        }
         failure {
             echo "🚨 Pipeline failed — but you’re still a legend."
+        }
+        success {
+            echo "✅ Pipeline passed! Celebrate like Seedhe Maut just dropped a verse."
         }
     }
 }
