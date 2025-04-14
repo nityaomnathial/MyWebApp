@@ -68,7 +68,7 @@ pipeline {
 
         stage('Git Push') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
+                withCredentials([usernamePassword(credentialsId: 'github-pat', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
                     bat '''
                         git config --global user.email "nnathial@my.centennialcollege.ca"
                         git config --global user.name "nityaomnathial"
