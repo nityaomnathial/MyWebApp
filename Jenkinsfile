@@ -6,7 +6,11 @@ pipeline {
         jdk 'Java 17'
     }
 
-    environment {
+environment {
+    SONARQUBE_SCANNER_HOME = tool 'SonarScanner'
+    PATH = "C:\\Program Files\\Docker\\Docker\\resources\\bin;${env.PATH}"
+}
+environment {
         SONARQUBE_SCANNER_HOME = tool 'SonarScanner'
         PATH = "${SONARQUBE_SCANNER_HOME}/bin:${env.PATH}"
     }
